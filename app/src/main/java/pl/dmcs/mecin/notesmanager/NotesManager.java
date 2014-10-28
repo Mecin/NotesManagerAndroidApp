@@ -1,9 +1,15 @@
 package pl.dmcs.mecin.notesmanager;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 
 public class NotesManager extends Activity {
@@ -12,6 +18,28 @@ public class NotesManager extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_manager);
+
+        // Sign up button
+        Button signUpButton = (Button) findViewById(R.id.signup_button);
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Sign up!", Toast.LENGTH_SHORT).show();
+
+                // Switch to sign up fragment
+                switchFragment(new SignUp());
+            }
+        });
+
+        // Sign in button
+        Button signInButton = (Button) findViewById(R.id.signin_button);
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Sign in!", Toast.LENGTH_SHORT).show();
+                //switchFragment();
+            }
+        });
     }
 
 
@@ -32,5 +60,16 @@ public class NotesManager extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void switchFragment(Fragment fragment) {
+        //TextView helloText = (TextView) findViewById(R.id.hello_world);
+        //helloText.setText("Klik");
+
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.activity_notes_manager,fragment);
+        fragmentTransaction.commit();
     }
 }
