@@ -11,6 +11,7 @@
             android:name=".NotesManager"
             android:label="@string/app_name" >
             <intent-filter>
+                <provider android:name="pl.dmcs.notesmanager.providers.NotesManagerProvider" android:authorities="pl.dmcs.notesmanager.providers.NotesManagerProvider"/>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
