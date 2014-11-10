@@ -28,12 +28,21 @@
             />
 
         <EditText
+            android:id="@+id/user_email_sign_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/user_mail"
+            android:inputType="text" />
+
+        <EditText
             android:id="@+id/user_passwd_sign_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="@string/user_passwd"
             android:inputType="textPassword"
             />
+
+
 
         </LinearLayout>
 

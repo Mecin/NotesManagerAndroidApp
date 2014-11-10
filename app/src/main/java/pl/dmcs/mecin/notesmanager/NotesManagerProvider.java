@@ -31,7 +31,9 @@ public class NotesManagerProvider extends ContentProvider {
 
     private static final int USERS_ID = 2;
 
-    public static String AUTHORITY = "pl.dmcs.notesmanager.providers.NotesManagerProvider";
+    public static String AUTHORITY = "pl.dmcs.notesmanager.NotesManagerProvider";
+
+    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     private static HashMap<String, String> notesProjectionMap;
 
@@ -46,7 +48,8 @@ public class NotesManagerProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             Log.d(DATABASE_NAME, "onCreate");
             db.execSQL("CREATE TABLE " + USERS_TABLE_NAME + " (" + Tables.Users.USER_ID
-                    + " INTEGER PRIMARY KEY AUTOINCREMENT," + Tables.Users.USERNAME + " VARCHAR(255)," + Tables.Users.PASSWORD + " VARCHAR(255)" + ");");
+                    + " INTEGER PRIMARY KEY AUTOINCREMENT," + Tables.Users.USERNAME + " VARCHAR(255)," + Tables.Users.EMAIL + " VARCHAR(255)," + Tables.Users.PASSWORD + " VARCHAR(255)" + ");");
+            Log.d("SQLite", "onCreate");
         }
 
         @Override
@@ -82,7 +85,7 @@ public class NotesManagerProvider extends ContentProvider {
     public String getType(Uri uri) {
         switch (uriMatcher.match(uri)) {
             case USERS:
-                return Tables.Users.CONTENT_TYPE;
+                return Tables.Users.TABLE_NAME;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -90,22 +93,20 @@ public class NotesManagerProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        if (uriMatcher.match(uri) != USERS) {
-            throw new IllegalArgumentException("Unknown URI " + uri);
-        }
-
+        Log.d("SQLite", "insert start");
         ContentValues values;
         if (initialValues != null) {
             values = new ContentValues(initialValues);
         } else {
             values = new ContentValues();
         }
-
+        Log.d("SQLite", "insert middle");
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         long rowId = db.insert(USERS_TABLE_NAME, Tables.Users.USERNAME, values);
         if (rowId > 0) {
             Uri noteUri = ContentUris.withAppendedId(Tables.Users.CONTENT_URI, rowId);
             getContext().getContentResolver().notifyChange(noteUri, null);
+            Log.d("SQLite", "Inserted");
             return noteUri;
         }
 
@@ -165,6 +166,7 @@ public class NotesManagerProvider extends ContentProvider {
         notesProjectionMap = new HashMap<String, String>();
         notesProjectionMap.put(Tables.Users.USER_ID, Tables.Users.USER_ID);
         notesProjectionMap.put(Tables.Users.USERNAME, Tables.Users.USERNAME);
+        notesProjectionMap.put(Tables.Users.EMAIL, Tables.Users.EMAIL);
         notesProjectionMap.put(Tables.Users.PASSWORD, Tables.Users.PASSWORD);
     }
 }
