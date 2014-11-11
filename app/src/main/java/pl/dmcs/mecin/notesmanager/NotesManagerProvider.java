@@ -195,7 +195,7 @@ public class NotesManagerProvider extends ContentProvider {
                 break;
             case USERS_ID:
                 selectFromTable = Tables.Users.TABLE_NAME;
-                selection = selection + "_id = " + uri.getLastPathSegment();
+                selection = selection + " = " + uri.getLastPathSegment();
                 Log.d("QUERY", "Selecting user by id.");
                 break;
             case CATEGORIES:
@@ -204,7 +204,7 @@ public class NotesManagerProvider extends ContentProvider {
                 break;
             case CATEGORIES_ID:
                 selectFromTable = Tables.Categories.TABLE_NAME;
-                selection = selection + "_id = " + uri.getLastPathSegment();
+                selection = selection + " = " + uri.getLastPathSegment();
                 Log.d("QUERY", "Selecting category by id.");
                 break;
             case NOTES:
@@ -213,7 +213,7 @@ public class NotesManagerProvider extends ContentProvider {
                 break;
             case NOTES_ID:
                 selectFromTable = Tables.Notes.TABLE_NAME;
-                selection = selection + "_id = " + uri.getLastPathSegment();
+                selection = selection + " = " + uri.getLastPathSegment();
                 Log.d("QUERY", "Selecting note by id.");
                 break;
             default:
@@ -252,6 +252,7 @@ public class NotesManagerProvider extends ContentProvider {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(AUTHORITY, Tables.Users.TABLE_NAME, USERS);
         uriMatcher.addURI(AUTHORITY, Tables.Users.TABLE_NAME + "/#", USERS_ID);
+
 
         uriMatcher.addURI(AUTHORITY, Tables.Categories.TABLE_NAME, CATEGORIES);
         uriMatcher.addURI(AUTHORITY, Tables.Categories.TABLE_NAME + "/#", CATEGORIES_ID);

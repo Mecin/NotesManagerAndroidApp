@@ -12,6 +12,8 @@
     <string name="explore_database">database</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="get_users_db">Get users</string>
+    <string name="get_notes_db">Get notes</string>
     <string name="user_by_id">by id: </string>
+    <string name="add_new_note">Add note</string>
 
 </resources>

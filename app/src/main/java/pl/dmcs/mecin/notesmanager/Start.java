@@ -61,11 +61,11 @@ public class Start extends Fragment {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getActivity().getApplicationContext(), "Sign in!", Toast.LENGTH_SHORT).show();
-                //switchFragment();
+                mCallback.onButtonClick(new SignIn());
             }
         });
 
-        // Sign up button
+        // Database Explorer button
         Button databaseButton = (Button) view.findViewById(R.id.database_button);
         databaseButton.setOnClickListener(new View.OnClickListener() {
             @Override

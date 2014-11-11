@@ -68,6 +68,7 @@ public class DatabaseExplorer extends ListFragment {
         View view = inflater.inflate(R.layout.fragment_database_explorer, container, false);
         queryResultArrayList = new ArrayList<String>();
 
+        // Get users/user
         Button getUsersButton = (Button) view.findViewById(R.id.get_users_db);
         getUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,7 +86,7 @@ public class DatabaseExplorer extends ListFragment {
 
                 Log.d("GET_USERS", "before query.");
                 // Select username, email from users like - returns cursor
-                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USERNAME, Tables.Users.EMAIL}, "", null, null );
+                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USERNAME, Tables.Users.EMAIL, Tables.Users.PASSWORD}, "_id", null, null );
 
                 String userToList;
 
@@ -96,6 +97,43 @@ public class DatabaseExplorer extends ListFragment {
                         userToList += "Username: " + resultCursor.getString(0) + "\nEmail: " + resultCursor.getString(1);
                         queryResultArrayList.add(userToList);
                         Log.d("GET_USERS", "username: " + resultCursor.getString(0) );
+                    }
+
+                    adapter.notifyDataSetChanged();
+                }
+
+            }
+        });
+
+        // Get notes/note
+        Button getNotesButton = (Button) view.findViewById(R.id.get_notes_db);
+        getNotesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity().getApplicationContext(), "Reading from db", Toast.LENGTH_SHORT).show();
+                EditText noteIdEditText = (EditText) getActivity().findViewById(R.id.note_id_db);
+                String noteId = "";
+                if(noteIdEditText != null) {
+                    if(!noteIdEditText.getText().toString().equals("")) {
+                        noteId = "/" + noteIdEditText.getText().toString();
+                        Log.d("GET_NOTES", "userId : " + noteId);
+                    }
+                }
+                Uri getUsersUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Notes.TABLE_NAME + noteId);
+
+                Log.d("GET_NOTES", "before query.");
+                // Select username, email from users like - returns cursor
+                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Notes.NOTETITLE}, "_id", null, null );
+
+                String userToList;
+
+                if(resultCursor != null) {
+                    queryResultArrayList.clear();
+                    while(resultCursor.moveToNext()) {
+                        userToList = "";
+                        userToList += "Title: " + resultCursor.getString(0);
+                        queryResultArrayList.add(userToList);
+                        Log.d("GET_NOTES", "Title: " + resultCursor.getString(0) );
                     }
 
                     adapter.notifyDataSetChanged();
