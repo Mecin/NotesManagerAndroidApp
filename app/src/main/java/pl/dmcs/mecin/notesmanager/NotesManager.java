@@ -12,46 +12,24 @@ import android.widget.Button;
 import android.widget.Toast;
 
 
-public class NotesManager extends Activity {
+public class NotesManager extends Activity implements Start.OnClickActivityAction {
+
+    @Override
+    public void onButtonClick(Fragment fragment) {
+        switchFragment(fragment);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_manager);
 
-        // Sign up button
-        Button signUpButton = (Button) findViewById(R.id.signup_button);
-        signUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Sign up!", Toast.LENGTH_SHORT).show();
+        if (savedInstanceState == null) {
+            Fragment newFragment = new Start();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.add(R.id.activity_notes_manager, newFragment).commit();
+        }
 
-                // Switch to sign up fragment
-                switchFragment(new SignUp());
-            }
-        });
-
-        // Sign in button
-        Button signInButton = (Button) findViewById(R.id.signin_button);
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Sign in!", Toast.LENGTH_SHORT).show();
-                //switchFragment();
-            }
-        });
-
-        // Sign up button
-        Button databaseButton = (Button) findViewById(R.id.database_button);
-        databaseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Explore database!", Toast.LENGTH_SHORT).show();
-
-                // Switch to sign up fragment
-                switchFragment(new DatabaseExplorer());
-            }
-        });
     }
 
 
@@ -81,7 +59,7 @@ public class NotesManager extends Activity {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.replace(R.id.activity_notes_manager,fragment);
+        fragmentTransaction.replace(R.id.activity_notes_manager, fragment);
         fragmentTransaction.commit();
     }
 }

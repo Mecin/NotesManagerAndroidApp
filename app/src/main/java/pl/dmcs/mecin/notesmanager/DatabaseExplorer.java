@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,18 +73,27 @@ public class DatabaseExplorer extends ListFragment {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getActivity().getApplicationContext(), "Reading from db", Toast.LENGTH_SHORT).show();
-                Uri getUsersUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME);
+                EditText userIdEditText = (EditText) getActivity().findViewById(R.id.user_id_db);
+                String userId = "";
+                if(userIdEditText != null) {
+                    if(!userIdEditText.getText().toString().equals("")) {
+                        userId = "/" + userIdEditText.getText().toString();
+                        Log.d("GET_USERS", "userId : " + userId);
+                    }
+                }
+                Uri getUsersUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME + userId);
 
                 Log.d("GET_USERS", "before query.");
                 // Select username, email from users like - returns cursor
-                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USERNAME, Tables.Users.EMAIL}, null, null, null );
+                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USERNAME, Tables.Users.EMAIL}, "", null, null );
 
                 String userToList;
 
                 if(resultCursor != null) {
+                    queryResultArrayList.clear();
                     while(resultCursor.moveToNext()) {
                         userToList = "";
-                        userToList += resultCursor.getString(0) + "\n" + resultCursor.getString(1);
+                        userToList += "Username: " + resultCursor.getString(0) + "\nEmail: " + resultCursor.getString(1);
                         queryResultArrayList.add(userToList);
                         Log.d("GET_USERS", "username: " + resultCursor.getString(0) );
                     }
