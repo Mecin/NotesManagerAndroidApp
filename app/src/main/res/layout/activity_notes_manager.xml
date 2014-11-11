@@ -37,6 +37,13 @@
             android:text="@string/sign_up"
             />
 
+        <Button
+            android:id="@+id/database_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/explore_database"
+            />
+
         </LinearLayout>
 
 

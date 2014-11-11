@@ -40,6 +40,18 @@ public class NotesManager extends Activity {
                 //switchFragment();
             }
         });
+
+        // Sign up button
+        Button databaseButton = (Button) findViewById(R.id.database_button);
+        databaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Explore database!", Toast.LENGTH_SHORT).show();
+
+                // Switch to sign up fragment
+                switchFragment(new DatabaseExplorer());
+            }
+        });
     }
 
 

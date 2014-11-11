@@ -59,6 +59,7 @@ public class SignUp extends Fragment {
                     contentValues.put(Tables.Users.EMAIL, email);
 
                     Uri addUserUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME);
+
                     //Uri addUserUri = getActivity().getContentResolver().insert(Tables.Users.CONTENT_URI, contentValues);
 
                     Log.d("REGISTER", "before inserting.");
