@@ -14,6 +14,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,6 +56,23 @@ public class AddNoteDialog extends DialogFragment {
 
                         if (!noteTitleEditText.getText().toString().equals("") && !noteTextEditText.getText().toString().equals("")) {
 
+                            // JSON
+                            JSONObject addNoteJsonObject = new JSONObject();
+
+                            try {
+                                addNoteJsonObject.put(Tables.Notes.NOTEOWNER + "Id", Tables.SIGNED_USER_ID);
+                                addNoteJsonObject.put(Tables.Notes.NOTETITLE, noteTitleEditText.getText().toString());
+                                addNoteJsonObject.put(Tables.Notes.NOTECONTENT, noteTextEditText.getText().toString());
+
+                                Log.d("JSON", "before execute add note");
+
+                                new HttpAsyncTask().execute(addNoteJsonObject, Tables.API_SERVER + Tables.API_ADD_NOTE);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
 
                             //mCallback.onConnectDialogFragment(IP_ADDR, selectedPosition);
                         } else {

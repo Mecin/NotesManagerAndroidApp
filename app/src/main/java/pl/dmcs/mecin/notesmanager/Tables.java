@@ -1,5 +1,6 @@
 package pl.dmcs.mecin.notesmanager;
 
+import android.app.ProgressDialog;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
@@ -24,12 +25,20 @@ public class Tables {
     public Tables() {
 
     }
+    public static ProgressDialog progressDialog;
+    public static boolean loggingFlag = false;
+    public static boolean getUserFlag = false;
 
     public static final String API_SERVER = "http://mkolodziejski.eu/api/";
     public static final String API_REGISTER_USER = "registerUser";
     public static final String API_ADD_NOTE = "createNote";
     public static final String API_GET_NOTES = "getNotes";
     public static final String API_GET_USER = "getUser";
+    public static final String API_LOGIN_USER = "loginUser";
+    public static final String API_CREATE_CATEGORY = "createCategory";
+
+    public static String SIGNED_USERNAME = "";
+    public static String SIGNED_USER_ID = "";
 
     public static final class Users implements BaseColumns {
         private Users() {
@@ -135,7 +144,7 @@ public class Tables {
         }
 
         // 11. return result
-        return convertInputStreamToJSONObject(inputStream);
+        return convertInputStreamToJSONObject(inputStream, url);
     }
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
@@ -150,7 +159,7 @@ public class Tables {
 
     }
 
-    private static JSONObject convertInputStreamToJSONObject(InputStream inputStream) throws JSONException, IOException {
+    private static JSONObject convertInputStreamToJSONObject(InputStream inputStream, String operation) throws JSONException, IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line = "";
         String result = "";
@@ -158,7 +167,131 @@ public class Tables {
             result += line;
 
         inputStream.close();
-        return new JSONObject(result);
+        JSONObject resultJSNObject = new JSONObject(result);
+
+        try {
+            if(operation.equals(Tables.API_SERVER + Tables.API_ADD_NOTE)) {
+                Log.d("OP POST", "Operation: " + operation);
+                Log.d("CREATE CATEGORY", resultJSNObject.toString());
+                if(resultJSNObject.getString("success").equals("true")) {
+                    Log.d("OP POST", "API_ADD_NOTE successful.");
+                    //Tables.loggingFlag = false;
+                } else {
+                    Log.d("OP POST", "API_ADD_NOTE could not register.");
+                    //Tables.loggingFlag = false;
+                    //Tables.SIGNED_USERNAME = "";
+                }
+            } else if(operation.equals(Tables.API_SERVER + Tables.API_CREATE_CATEGORY)) {
+                Log.d("OP POST", "Operation: " + operation);
+                Log.d("CREATE CATEGORY", resultJSNObject.toString());
+                if(resultJSNObject.getString("success").equals("true")) {
+                    Log.d("OP POST", "API_CREATE_CATEGORY successful.");
+                    //Tables.loggingFlag = false;
+                } else {
+                    Log.d("OP POST", "API_CREATE_CATEGORY could not register.");
+                    //Tables.loggingFlag = false;
+                    //Tables.SIGNED_USERNAME = "";
+                }
+            } else if(operation.equals(Tables.API_SERVER + Tables.API_REGISTER_USER)) {
+                Log.d("OP POST", "Operation: " + operation);
+
+                if(resultJSNObject.getString("success").equals("true")) {
+                    Log.d("OP POST", "API_REGISTER_USER successful.");
+                    //Tables.loggingFlag = false;
+                } else {
+                    Log.d("OP POST", "API_REGISTER_USER could not register.");
+                    //Tables.loggingFlag = false;
+                    //Tables.SIGNED_USERNAME = "";
+                }
+            } else if (operation.equals(Tables.API_SERVER + Tables.API_LOGIN_USER)) {
+                Log.d("OP POST", "Operation: " + operation);
+
+                // Set username
+                if(resultJSNObject.getString("success").equals("true")) {
+                    Log.d("OP POST", "SIGNED_USERNAME was set to " + Tables.SIGNED_USERNAME);
+                    Log.d("OP POST", "creating default category");
+
+                    // JSON getUser
+                    JSONObject getUserJsonObject = new JSONObject();
+                    try {
+
+                        getUserJsonObject.put(Tables.Users.USERNAME, Tables.SIGNED_USERNAME);
+                        Log.d("OP", "Operation: http://mkolodziejski.eu/api/getUser");
+                        Tables.getUserFlag = true;
+                        Tables.POST(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
+                        //new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.d("OP POST", "login before obtain id to create category.");
+                    // Obtain id.
+                    while(Tables.getUserFlag) {
+
+                    }
+
+                    Log.d("OP POST", "after obtain id: " + Tables.SIGNED_USER_ID);
+
+                    // JSON createCategory
+                    JSONObject createCategoryJsonObject = new JSONObject();
+
+                    try {
+
+                        createCategoryJsonObject.put(Categories.CATEGORYOWNER + "Id", Tables.SIGNED_USER_ID);
+                        createCategoryJsonObject.put("title", "default");
+                        new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_CREATE_CATEGORY);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    Tables.loggingFlag = false;
+                } else {
+                    Log.d("OP POST", "SIGNED_USERNAME could not be set.");
+                    Tables.loggingFlag = false;
+                    Tables.SIGNED_USERNAME = "";
+                }
+
+            } else if (operation.equals(Tables.API_SERVER + Tables.API_GET_USER)) {
+                Log.d("OP POST", "Operation: " + operation);
+
+                // Set userId
+                if(resultJSNObject.getString("success").equals("true") && !Tables.SIGNED_USERNAME.equals("")) {
+                    Tables.SIGNED_USER_ID = resultJSNObject.getString("message");
+                    Tables.getUserFlag = false;
+                    Log.d("OP POST", "SIGNED_USER_ID was set to " + Tables.SIGNED_USER_ID);
+                } else {
+                    Log.d("OP POST", "SIGNED_USER_ID could not be set.");
+                    Tables.SIGNED_USER_ID = "";
+                    Tables.getUserFlag = false;
+                }
+
+                //return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else if(operation.equals(Tables.API_SERVER + Tables.API_GET_NOTES)) {
+                Log.d("OP POST", "Operation: " + operation);
+                Log.d("OP POST", resultJSNObject.toString());
+
+                if(resultJSNObject.getString("success").equals("true")) {
+
+                    Log.d("notes ARRAY", resultJSNObject.getString("message"));
+                    Log.d("OP POST", "API_GET_NOTES was executed successfully.");
+                } else {
+                    Log.d("OP POST", "API_GET_NOTES could not be executed.");
+
+                }
+
+
+
+            } else {
+                Log.d("OP", "Unexpected operation: " + operation);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return resultJSNObject;
     }
 }
 

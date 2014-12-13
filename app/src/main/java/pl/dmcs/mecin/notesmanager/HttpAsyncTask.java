@@ -16,13 +16,35 @@ public class HttpAsyncTask extends AsyncTask<Object, Void, JSONObject> {
     @Override
     protected JSONObject doInBackground(Object... params) {
 
+        String operation = (String)params[1];
         try {
-            return Tables.POST((JSONObject)params[0], (String)params[1]);
+            if(operation.equals(Tables.API_SERVER + Tables.API_ADD_NOTE)) {
+                Log.d("OP", "Operation: " + operation);
+                return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else if(operation.equals(Tables.API_SERVER + Tables.API_CREATE_CATEGORY)) {
+                Log.d("OP", "Operation: " + operation);
+                return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else if(operation.equals(Tables.API_SERVER + Tables.API_REGISTER_USER)) {
+                Log.d("OP", "Operation: " + operation);
+                return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else if (operation.equals(Tables.API_SERVER + Tables.API_LOGIN_USER)) {
+                Log.d("OP", "Operation: " + operation);
+                return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else if (operation.equals(Tables.API_SERVER + Tables.API_GET_USER)) {
+                Log.d("OP", "Operation: " + operation);
+                return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else if (operation.equals(Tables.API_SERVER + Tables.API_GET_NOTES)) {
+                Log.d("OP", "Operation: " + operation);
+                return Tables.POST((JSONObject) params[0], (String) params[1]);
+            } else {
+                Log.d("OP", "Unexpected operation: " + operation);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return new JSONObject();
     }
     // onPostExecute displays the results of the AsyncTask.
@@ -44,5 +66,12 @@ public class HttpAsyncTask extends AsyncTask<Object, Void, JSONObject> {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        if(Tables.progressDialog != null) {
+            if (Tables.progressDialog.isShowing()) {
+                Tables.progressDialog.dismiss();
+            }
+        }
+
     }
 }

@@ -34,10 +34,9 @@ public class NotesManager extends Activity implements Start.OnClickActivityActio
     }
 
     @Override
-    public void onSignInSuccess(Fragment fragment, String userId, String signedUserName) {
+    public void onSignInSuccess(Fragment fragment, String signedUserName) {
         Bundle bundle =  new Bundle();
         bundle.putString("user", signedUserName);
-        bundle.putString("id", userId);
         fragment.setArguments(bundle);
         switchFragment(fragment);
     }

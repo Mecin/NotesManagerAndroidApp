@@ -2,6 +2,7 @@ package pl.dmcs.mecin.notesmanager;
 
 
 import android.app.ListFragment;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -57,6 +58,19 @@ public class MainNotes extends ListFragment {
             }
         }
 
+        // JSON getUser
+        JSONObject getUserJsonObject = new JSONObject();
+
+
+
+        try {
+
+            getUserJsonObject.put(Tables.Users.USERNAME, SIGNED_USER);
+            new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         //ListView listView = (ListView) getActivity().findViewById(R.id.list);
 
         TextView signedUserTextView = (TextView) getActivity().findViewById(R.id.signed_user);
@@ -80,6 +94,8 @@ public class MainNotes extends ListFragment {
             getNotesJsonObject.put(Tables.Notes.NOTEOWNER + "Id", SIGNED_USER_ID);
 
             Log.d("JSON", "before execute");
+
+            Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
 
             new HttpAsyncTask().execute(getNotesJsonObject, Tables.API_SERVER + Tables.API_GET_NOTES);
 

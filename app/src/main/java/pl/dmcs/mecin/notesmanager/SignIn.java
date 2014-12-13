@@ -2,6 +2,7 @@ package pl.dmcs.mecin.notesmanager;
 
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
@@ -35,7 +36,7 @@ public class SignIn extends Fragment {
 
     // Interface for parent to comunicate
     public interface OnSignIn {
-        public void onSignInSuccess(Fragment fragment, String userId, String signedUserName);
+        public void onSignInSuccess(Fragment fragment, String signedUserName);
     }
 
     @Override
@@ -51,6 +52,7 @@ public class SignIn extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
 
@@ -70,12 +72,26 @@ public class SignIn extends Fragment {
                 if(!user.equals("") && !pass.equals("")) {
                     Log.d("LOGIN", "before login.");
 
-                    // JSON
+                    // JSON login
                     JSONObject userJsonObject = new JSONObject();
+
+                    // JSON getUser
+                    // JSONObject getUserJsonObject = new JSONObject();
 
                     try {
                         userJsonObject.put("login", user);
-                        new HttpAsyncTask().execute(userJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
+                        userJsonObject.put("password", pass);
+
+                        //getUserJsonObject.put(Tables.Users.USERNAME, user);
+                        Log.d("progressDialog", "before progressDialog");
+                        Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
+
+                        Tables.loggingFlag = true;
+
+                        new HttpAsyncTask().execute(userJsonObject, Tables.API_SERVER + Tables.API_LOGIN_USER);
+                        Tables.SIGNED_USERNAME = user;
+                        //new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -103,11 +119,23 @@ public class SignIn extends Fragment {
                         }
 
                         Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
-                        mCallback.onSignInSuccess(new MainNotes(), userId, userName);
+                        mCallback.onSignInSuccess(new MainNotes(), userName);
 
                     } else {
 
-                        Toast.makeText(getActivity().getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
+                        Log.d("LOGIN", "Logging in");
+                        while (Tables.loggingFlag) {
+                            // Logging in
+
+                        }
+
+
+                        if(!Tables.SIGNED_USERNAME.equals("")) {
+                            Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
+                            mCallback.onSignInSuccess(new MainNotes(), Tables.SIGNED_USERNAME);
+                        } else {
+                            Toast.makeText(getActivity().getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                 } else {
