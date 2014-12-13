@@ -55,7 +55,7 @@ public class NotesManagerProvider extends ContentProvider {
             Log.d(DATABASE_NAME, "onCreate");
             db.execSQL("CREATE TABLE " + Tables.Users.TABLE_NAME + " ("
                     + Tables.Users.USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + Tables.Users.USERNAME + " VARCHAR(255),"
+                    + Tables.Users.USERNAME + " VARCHAR(255) UNIQUE,"
                     + Tables.Users.EMAIL + " VARCHAR(255),"
                     + Tables.Users.PASSWORD + " VARCHAR(255)"
                     + ");");
@@ -166,7 +166,7 @@ public class NotesManagerProvider extends ContentProvider {
         Log.d("URIPARSE", " : toString " + uri.toString());
         Log.d("URIPARSE", " : getLastPathSegment " + uri.getLastPathSegment());
 
-        long rowId = db.insert(insertIntoTable, null, values);
+        long rowId = db.insertOrThrow(insertIntoTable, null, values);
         if (rowId > 0) {
             Uri noteUri = ContentUris.withAppendedId(Uri.parse("content://" + NotesManagerProvider.AUTHORITY + "/" + insertIntoTable), rowId);
             getContext().getContentResolver().notifyChange(noteUri, null);
@@ -174,6 +174,7 @@ public class NotesManagerProvider extends ContentProvider {
             return noteUri;
         }
 
+        //return null;
         throw new SQLException("Failed to insert row into " + uri);
     }
 

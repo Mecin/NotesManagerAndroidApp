@@ -1,9 +1,11 @@
 package pl.dmcs.mecin.notesmanager;
 
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -14,17 +16,37 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class SignIn extends Fragment {
 
+    OnSignIn mCallback;
 
     public SignIn() {
         // Required empty public constructor
     }
 
+    // Interface for parent to comunicate
+    public interface OnSignIn {
+        public void onSignInSuccess(Fragment fragment, String userId, String signedUserName);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback = (OnSignIn) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnSignIn");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -48,27 +70,45 @@ public class SignIn extends Fragment {
                 if(!user.equals("") && !pass.equals("")) {
                     Log.d("LOGIN", "before login.");
 
+                    // JSON
+                    JSONObject userJsonObject = new JSONObject();
+
+                    try {
+                        userJsonObject.put("login", user);
+                        new HttpAsyncTask().execute(userJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
                     Uri getUsersUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME);
 
                     Log.d("LOGIN", "last path segment: " + getUsersUri.getLastPathSegment());
 
-                    // Select username, email from users like - returns cursor
-                    Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USERNAME, Tables.Users.EMAIL, Tables.Users.PASSWORD}, Tables.Users.USERNAME + "=? AND " + Tables.Users.PASSWORD + "=?" , new String[]{user, pass}, null );
+                    // Select userid, username, email from users like - returns cursor
+                    Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USER_ID, Tables.Users.USERNAME, Tables.Users.EMAIL, Tables.Users.PASSWORD}, Tables.Users.USERNAME + "=? AND " + Tables.Users.PASSWORD + "=?" , new String[]{user, pass}, null );
 
-                    if(resultCursor != null) {
+                    if(resultCursor != null && resultCursor.getCount() > 0) {
+
+                        String userName = "";
+                        String userId = "";
 
                         while(resultCursor.moveToNext()) {
-                            Log.d("LOGIN", "Selected: username: " + resultCursor.getString(0)
-                            + " mail: " + resultCursor.getString(1)
-                            + " pass: " + resultCursor.getString(2)
+                            Log.d("LOGIN", "Selected: username: " + resultCursor.getString(1)
+                            + " mail: " + resultCursor.getString(2)
+                            + " pass: " + resultCursor.getString(3)
                             );
+                            userId = resultCursor.getString(0);
+                            userName = resultCursor.getString(1);
+
                         }
 
+                        Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
+                        mCallback.onSignInSuccess(new MainNotes(), userId, userName);
 
+                    } else {
+
+                        Toast.makeText(getActivity().getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
                     }
-
-                    Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
-
 
                 } else {
                     Toast.makeText(getActivity().getApplicationContext(), "Empty fields!", Toast.LENGTH_SHORT).show();
@@ -79,6 +119,7 @@ public class SignIn extends Fragment {
 
         return view;
     }
+
 
 
 }

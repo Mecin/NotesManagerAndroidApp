@@ -15,5 +15,10 @@
     <string name="get_notes_db">Get notes</string>
     <string name="user_by_id">by id: </string>
     <string name="add_new_note">Add note</string>
+    <string name="signed_user_name">Signed:</string>
+    <string name="note_title">Title</string>
+    <string name="note_text">Text of note</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

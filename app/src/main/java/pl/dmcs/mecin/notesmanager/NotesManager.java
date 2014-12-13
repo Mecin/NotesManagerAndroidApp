@@ -4,18 +4,41 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
 
-public class NotesManager extends Activity implements Start.OnClickActivityAction {
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+
+public class NotesManager extends Activity implements Start.OnClickActivityAction, SignIn.OnSignIn {
 
     @Override
     public void onButtonClick(Fragment fragment) {
+        switchFragment(fragment);
+    }
+
+    @Override
+    public void onSignInSuccess(Fragment fragment, String userId, String signedUserName) {
+        Bundle bundle =  new Bundle();
+        bundle.putString("user", signedUserName);
+        bundle.putString("id", userId);
+        fragment.setArguments(bundle);
         switchFragment(fragment);
     }
 
@@ -62,4 +85,10 @@ public class NotesManager extends Activity implements Start.OnClickActivityActio
         fragmentTransaction.replace(R.id.activity_notes_manager, fragment);
         fragmentTransaction.commit();
     }
+
+
+
+
 }
+
+
