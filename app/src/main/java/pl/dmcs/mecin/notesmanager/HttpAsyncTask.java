@@ -67,11 +67,6 @@ public class HttpAsyncTask extends AsyncTask<Object, Void, JSONObject> {
             e.printStackTrace();
         }
 
-        if(Tables.progressDialog != null) {
-            if (Tables.progressDialog.isShowing()) {
-                Tables.progressDialog.dismiss();
-            }
-        }
 
     }
 }

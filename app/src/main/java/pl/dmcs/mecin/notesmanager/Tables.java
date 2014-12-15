@@ -10,6 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * Created by mecin on 29.10.14.
@@ -28,6 +30,7 @@ public class Tables {
     public static ProgressDialog progressDialog;
     public static boolean loggingFlag = false;
     public static boolean getUserFlag = false;
+    public static boolean fetchNotes = false;
 
     public static final String API_SERVER = "http://mkolodziejski.eu/api/";
     public static final String API_REGISTER_USER = "registerUser";
@@ -39,6 +42,8 @@ public class Tables {
 
     public static String SIGNED_USERNAME = "";
     public static String SIGNED_USER_ID = "";
+
+    public static ArrayList<String> notesArrayList = null;
 
     public static final class Users implements BaseColumns {
         private Users() {
@@ -167,6 +172,7 @@ public class Tables {
             result += line;
 
         inputStream.close();
+        Log.d("int2json result: ", result);
         JSONObject resultJSNObject = new JSONObject(result);
 
         try {
@@ -186,10 +192,10 @@ public class Tables {
                 Log.d("CREATE CATEGORY", resultJSNObject.toString());
                 if(resultJSNObject.getString("success").equals("true")) {
                     Log.d("OP POST", "API_CREATE_CATEGORY successful.");
-                    //Tables.loggingFlag = false;
+                    Tables.loggingFlag = false;
                 } else {
                     Log.d("OP POST", "API_CREATE_CATEGORY could not register.");
-                    //Tables.loggingFlag = false;
+                    Tables.loggingFlag = false;
                     //Tables.SIGNED_USERNAME = "";
                 }
             } else if(operation.equals(Tables.API_SERVER + Tables.API_REGISTER_USER)) {
@@ -209,7 +215,7 @@ public class Tables {
                 // Set username
                 if(resultJSNObject.getString("success").equals("true")) {
                     Log.d("OP POST", "SIGNED_USERNAME was set to " + Tables.SIGNED_USERNAME);
-                    Log.d("OP POST", "creating default category");
+                    // Log.d("OP POST", "creating default category");
 
                     // JSON getUser
                     JSONObject getUserJsonObject = new JSONObject();
@@ -221,12 +227,11 @@ public class Tables {
                         Tables.POST(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
                         //new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
 
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    Log.d("OP POST", "login before obtain id to create category.");
+                    Log.d("OP POST", "login before obtain id.");
                     // Obtain id.
                     while(Tables.getUserFlag) {
 
@@ -235,17 +240,17 @@ public class Tables {
                     Log.d("OP POST", "after obtain id: " + Tables.SIGNED_USER_ID);
 
                     // JSON createCategory
-                    JSONObject createCategoryJsonObject = new JSONObject();
+                    //JSONObject createCategoryJsonObject = new JSONObject();
 
-                    try {
+                    //try {
 
-                        createCategoryJsonObject.put(Categories.CATEGORYOWNER + "Id", Tables.SIGNED_USER_ID);
-                        createCategoryJsonObject.put("title", "default");
-                        new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_CREATE_CATEGORY);
+                    //    createCategoryJsonObject.put(Categories.CATEGORYOWNER + "Id", Tables.SIGNED_USER_ID);
+                    //    createCategoryJsonObject.put("title", "default");
+                    //    new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_CREATE_CATEGORY);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    //} catch (JSONException e) {
+                    //    e.printStackTrace();
+                    //}
 
                     Tables.loggingFlag = false;
                 } else {
@@ -254,18 +259,26 @@ public class Tables {
                     Tables.SIGNED_USERNAME = "";
                 }
 
+                if(Tables.progressDialog != null) {
+                    if (Tables.progressDialog.isShowing()) {
+                        Tables.progressDialog.dismiss();
+                    }
+                }
+
             } else if (operation.equals(Tables.API_SERVER + Tables.API_GET_USER)) {
                 Log.d("OP POST", "Operation: " + operation);
 
                 // Set userId
                 if(resultJSNObject.getString("success").equals("true") && !Tables.SIGNED_USERNAME.equals("")) {
                     Tables.SIGNED_USER_ID = resultJSNObject.getString("message");
-                    Tables.getUserFlag = false;
+                    //Tables.loggingFlag = false;
                     Log.d("OP POST", "SIGNED_USER_ID was set to " + Tables.SIGNED_USER_ID);
+                    Tables.getUserFlag = false;
                 } else {
                     Log.d("OP POST", "SIGNED_USER_ID could not be set.");
                     Tables.SIGNED_USER_ID = "";
                     Tables.getUserFlag = false;
+                    //Tables.loggingFlag = false;
                 }
 
                 //return Tables.POST((JSONObject) params[0], (String) params[1]);
@@ -275,13 +288,29 @@ public class Tables {
 
                 if(resultJSNObject.getString("success").equals("true")) {
 
-                    Log.d("notes ARRAY", resultJSNObject.getString("message"));
+                    JSONArray notesJsonArray = new JSONArray(resultJSNObject.getString("message"));
+                    //notesJsonArray.put(resultJSNObject.get("message"));
+                    Log.d("notes ARRAY", notesJsonArray.toString());
+                    Tables.notesArrayList.clear();
+                    for(int i = 0; i < notesJsonArray.length(); i++) {
+                        JSONObject row = notesJsonArray.getJSONObject(i);
+                        Log.d("FOREACH","note: " + i + " " + row.getString(Notes.NOTETITLE) + " == " + row.getString(Notes.NOTECONTENT));
+                        Tables.notesArrayList.add("Title: " + row.getString(Notes.NOTETITLE) + "\nContent: " + row.getString(Notes.NOTECONTENT));
+                    }
+                    Log.d("notes get message", resultJSNObject.getString("message"));
                     Log.d("OP POST", "API_GET_NOTES was executed successfully.");
                 } else {
                     Log.d("OP POST", "API_GET_NOTES could not be executed.");
 
                 }
 
+                Tables.fetchNotes = false;
+
+                if(Tables.progressDialog != null) {
+                    if (Tables.progressDialog.isShowing()) {
+                        Tables.progressDialog.dismiss();
+                    }
+                }
 
 
             } else {

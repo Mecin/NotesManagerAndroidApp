@@ -123,7 +123,7 @@ public class DatabaseExplorer extends ListFragment {
 
                 Log.d("GET_NOTES", "before query.");
                 // Select username, email from users like - returns cursor
-                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Notes.NOTETITLE}, "_id", null, null );
+                Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Notes.NOTETITLE, Tables.Notes.NOTECONTENT, Tables.Notes.NOTEOWNER}, "_id", null, null );
 
                 String userToList;
 
@@ -131,9 +131,11 @@ public class DatabaseExplorer extends ListFragment {
                     queryResultArrayList.clear();
                     while(resultCursor.moveToNext()) {
                         userToList = "";
-                        userToList += "Title: " + resultCursor.getString(0);
+                        userToList += "Title: " + resultCursor.getString(0)
+                        + "\nContent: " + resultCursor.getString(1)
+                        + "\nOwner: " + resultCursor.getString(2);
                         queryResultArrayList.add(userToList);
-                        Log.d("GET_NOTES", "Title: " + resultCursor.getString(0) );
+                        Log.d("GET_NOTES", "Title: " + resultCursor.getString(0));
                     }
 
                     adapter.notifyDataSetChanged();

@@ -23,8 +23,8 @@
         </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
@@ -34,12 +34,19 @@
             android:text="@string/add_new_note"
             />
 
+        <Button
+            android:id="@+id/fetch_notes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/get_notes_db"/>
+
 
     </LinearLayout>
 
     <ListView
-        android:layout_marginTop="10dp"
         android:id="@android:id/list"
+        android:layout_marginTop="10dp"
+
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 

@@ -72,6 +72,10 @@ public class SignIn extends Fragment {
                 if(!user.equals("") && !pass.equals("")) {
                     Log.d("LOGIN", "before login.");
 
+                    Log.d("progressDialog", "before progressDialog");
+
+                    Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
+
                     // JSON login
                     JSONObject userJsonObject = new JSONObject();
 
@@ -83,8 +87,7 @@ public class SignIn extends Fragment {
                         userJsonObject.put("password", pass);
 
                         //getUserJsonObject.put(Tables.Users.USERNAME, user);
-                        Log.d("progressDialog", "before progressDialog");
-                        Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
+
 
                         Tables.loggingFlag = true;
 

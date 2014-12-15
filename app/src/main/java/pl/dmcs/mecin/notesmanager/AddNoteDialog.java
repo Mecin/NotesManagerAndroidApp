@@ -4,7 +4,9 @@ package pl.dmcs.mecin.notesmanager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -73,6 +75,20 @@ public class AddNoteDialog extends DialogFragment {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(Tables.Notes.NOTEOWNER, Tables.SIGNED_USERNAME);
+                            contentValues.put(Tables.Notes.NOTETITLE, noteTitleEditText.getText().toString());
+                            contentValues.put(Tables.Notes.NOTECONTENT, noteTextEditText.getText().toString());
+
+                            Uri addNote = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Notes.TABLE_NAME);
+
+                            //Uri addUserUri = getActivity().getContentResolver().insert(Tables.Users.CONTENT_URI, contentValues);
+
+                            Log.d("ADD NOTE DB", "before inserting.");
+                            Uri resultUri = getActivity().getContentResolver().insert(addNote, contentValues);
+
+                            Log.d("ADD NOTE DB", "success.");
 
                             //mCallback.onConnectDialogFragment(IP_ADDR, selectedPosition);
                         } else {
