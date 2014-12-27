@@ -2,6 +2,7 @@ package pl.dmcs.mecin.notesmanager;
 
 
 
+import android.app.FragmentTransaction;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
@@ -84,6 +85,8 @@ public class SignUp extends Fragment {
 
                         Log.d("JSON", "before execute");
 
+                        Tables.registerFlag = true;
+
                         new HttpAsyncTask().execute(userJsonObject, Tables.API_SERVER + Tables.API_REGISTER_USER);
 
                     } catch (JSONException e) {
@@ -91,7 +94,6 @@ public class SignUp extends Fragment {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
 
 
                     Uri addUserUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME);
@@ -102,13 +104,36 @@ public class SignUp extends Fragment {
                     Uri resultUri = getActivity().getContentResolver().insert(addUserUri, contentValues);
 
 
+                    while(Tables.registerFlag) {
+                        // Registering
+                    }
 
-                    Toast.makeText(getActivity().getApplicationContext(), "New record inserted!", Toast.LENGTH_SHORT).show();
-                    // To get my ContentProvider for sql calls
-                    //getActivity().getContentResolver().insert("USERS" ,contentValues)
+                    if(Tables.success) {
+
+                        Tables.success = false;
+
+                        Toast.makeText(getActivity().getApplicationContext(), "Sign up success!", Toast.LENGTH_SHORT).show();
+
+                        // Pop SignUp fragment
+                        getFragmentManager().popBackStack();
+
+                        // And create new instance
+                        Fragment newFragInstance = new SignIn();
+                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+                        transaction.replace(R.id.activity_notes_manager, newFragInstance);
+
+                        // To store prevous fragment keep null
+                        transaction.addToBackStack(null);
+
+                        // Commit the transaction
+                        transaction.commit();
+                    } else {
+                        Toast.makeText(getActivity().getApplicationContext(), "Sign up failed!", Toast.LENGTH_SHORT).show();
+                    }
 
                 } else {
-                    Toast.makeText(getActivity().getApplicationContext(), "Not inserted!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "Empty fields!", Toast.LENGTH_SHORT).show();
                     //switchFragment();
                 }
             }

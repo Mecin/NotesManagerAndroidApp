@@ -22,5 +22,6 @@
     <string name="cancel">Cancel</string>
     <string name="action_exit">Exit</string>
     <string name="action_ok">OK</string>
+    <string name="sign_out">Sign out.</string>
 
 </resources>

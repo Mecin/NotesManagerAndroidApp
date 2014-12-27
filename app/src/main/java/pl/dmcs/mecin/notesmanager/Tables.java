@@ -31,6 +31,8 @@ public class Tables {
     public static boolean loggingFlag = false;
     public static boolean getUserFlag = false;
     public static boolean fetchNotes = false;
+    public static boolean registerFlag = false;
+    public static boolean success = false;
 
     public static final String API_SERVER = "http://mkolodziejski.eu/api/";
     public static final String API_REGISTER_USER = "registerUser";
@@ -203,9 +205,13 @@ public class Tables {
 
                 if(resultJSNObject.getString("success").equals("true")) {
                     Log.d("OP POST", "API_REGISTER_USER successful.");
+                    Tables.registerFlag = false;
+                    Tables.success = true;
                     //Tables.loggingFlag = false;
                 } else {
                     Log.d("OP POST", "API_REGISTER_USER could not register.");
+                    Tables.registerFlag = false;
+                    Tables.success = false;
                     //Tables.loggingFlag = false;
                     //Tables.SIGNED_USERNAME = "";
                 }
@@ -238,19 +244,6 @@ public class Tables {
                     }
 
                     Log.d("OP POST", "after obtain id: " + Tables.SIGNED_USER_ID);
-
-                    // JSON createCategory
-                    //JSONObject createCategoryJsonObject = new JSONObject();
-
-                    //try {
-
-                    //    createCategoryJsonObject.put(Categories.CATEGORYOWNER + "Id", Tables.SIGNED_USER_ID);
-                    //    createCategoryJsonObject.put("title", "default");
-                    //    new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_CREATE_CATEGORY);
-
-                    //} catch (JSONException e) {
-                    //    e.printStackTrace();
-                    //}
 
                     Tables.loggingFlag = false;
                 } else {

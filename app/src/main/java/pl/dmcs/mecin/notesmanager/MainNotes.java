@@ -1,6 +1,7 @@
 package pl.dmcs.mecin.notesmanager;
 
 
+import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -8,6 +9,8 @@ import android.net.wifi.WifiConfiguration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,6 +92,33 @@ public class MainNotes extends ListFragment {
 
         TextView signedUserTextView = (TextView) getActivity().findViewById(R.id.signed_user);
         signedUserTextView.append(" " + Tables.SIGNED_USERNAME + ".");
+
+        TextView signoutTextView = (TextView)getActivity().findViewById(R.id.sign_out_text);
+
+        String signOutText = "Sign out.";
+        SpannableString spannableString = new SpannableString(signOutText);
+        spannableString.setSpan(new UnderlineSpan(), 0, signOutText.length(), 0);
+        signoutTextView.setText(spannableString);
+
+        signoutTextView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Log.d("LINK", "ON LINK CLICK.");
+
+                Tables.SIGNED_USERNAME = "";
+
+                Tables.SIGNED_USER_ID = "";
+
+                // Pop MainNotes fragment
+                getFragmentManager().popBackStack();
+
+                // Pop SignIn fragment
+                getFragmentManager().popBackStack();
+
+            }
+
+        });
 
         // getting notes from server
         while(Tables.fetchNotes) {
