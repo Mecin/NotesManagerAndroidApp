@@ -62,19 +62,19 @@ public class SignIn extends Fragment {
             @Override
             public void onClick(View v) {
 
-                EditText userEditText = (EditText)getView().findViewById(R.id.user_name_sign_in);
-                EditText passEditText = (EditText)getView().findViewById(R.id.user_passwd_sign_in); //TODO still not encrypted
+                EditText userEditText = (EditText) getView().findViewById(R.id.user_name_sign_in);
+                EditText passEditText = (EditText) getView().findViewById(R.id.user_passwd_sign_in); //TODO still not encrypted
 
                 String user = userEditText.getText().toString();
                 String pass = passEditText.getText().toString();
 
                 // Simply check
-                if(!user.equals("") && !pass.equals("")) {
+                if (!user.equals("") && !pass.equals("")) {
                     Log.d("LOGIN", "before login.");
 
                     Log.d("progressDialog", "before progressDialog");
 
-                    Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
+                    Tables.progressDialog = ProgressDialog.show(v.getContext(), "", "Please wait...", true, true);
 
                     // JSON login
                     JSONObject userJsonObject = new JSONObject();
@@ -88,59 +88,85 @@ public class SignIn extends Fragment {
 
                         //getUserJsonObject.put(Tables.Users.USERNAME, user);
 
-
                         Tables.loggingFlag = true;
 
-                        new HttpAsyncTask().execute(userJsonObject, Tables.API_SERVER + Tables.API_LOGIN_USER);
                         Tables.SIGNED_USERNAME = user;
+
+                        new HttpAsyncTask().execute(userJsonObject, Tables.API_SERVER + Tables.API_LOGIN_USER);
+
                         //new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    Uri getUsersUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME);
+                    Log.d("LOGIN", "Logging in");
+                    while (Tables.loggingFlag) {
+                        // Logging in
 
-                    Log.d("LOGIN", "last path segment: " + getUsersUri.getLastPathSegment());
+                    }
 
-                    // Select userid, username, email from users like - returns cursor
-                    Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USER_ID, Tables.Users.USERNAME, Tables.Users.EMAIL, Tables.Users.PASSWORD}, Tables.Users.USERNAME + "=? AND " + Tables.Users.PASSWORD + "=?" , new String[]{user, pass}, null );
+                    if (!Tables.SIGNED_USERNAME.equals("")) {
 
-                    if(resultCursor != null && resultCursor.getCount() > 0) {
-
-                        String userName = "";
-                        String userId = "";
-
-                        while(resultCursor.moveToNext()) {
-                            Log.d("LOGIN", "Selected: username: " + resultCursor.getString(1)
-                            + " mail: " + resultCursor.getString(2)
-                            + " pass: " + resultCursor.getString(3)
-                            );
-                            userId = resultCursor.getString(0);
-                            userName = resultCursor.getString(1);
-
+                        if (Tables.progressDialog != null) {
+                            if (Tables.progressDialog.isShowing()) {
+                                Tables.progressDialog.dismiss();
+                            }
                         }
 
                         Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
-                        mCallback.onSignInSuccess(new MainNotes(), userName);
+                        mCallback.onSignInSuccess(new MainNotes(), Tables.SIGNED_USERNAME);
 
                     } else {
-
-                        Log.d("LOGIN", "Logging in");
-                        while (Tables.loggingFlag) {
-                            // Logging in
-
-                        }
+                        Log.d("LOG IN", "REMOTE LOG IN FAILED. CHECK LOCAL DB.");
+                        Toast.makeText(getActivity().getApplicationContext(), "Remote login failed!", Toast.LENGTH_SHORT).show();
 
 
-                        if(!Tables.SIGNED_USERNAME.equals("")) {
+                        Uri getUsersUri = Uri.withAppendedPath(NotesManagerProvider.CONTENT_URI, Tables.Users.TABLE_NAME);
+
+                        Log.d("LOGIN", "last path segment: " + getUsersUri.getLastPathSegment());
+
+                        // Select userid, username, email from users like - returns cursor
+                        Cursor resultCursor = getActivity().getContentResolver().query(getUsersUri, new String[]{Tables.Users.USER_ID, Tables.Users.USERNAME, Tables.Users.EMAIL, Tables.Users.PASSWORD}, Tables.Users.USERNAME + "=? AND " + Tables.Users.PASSWORD + "=?", new String[]{user, pass}, null);
+
+                        if (resultCursor != null && resultCursor.getCount() > 0) {
+
+                            String userName = "";
+                            String userId = "";
+
+                            while (resultCursor.moveToNext()) {
+                                Log.d("LOGIN", "Selected: username: " + resultCursor.getString(1)
+                                            + " mail: " + resultCursor.getString(2)
+                                            + " pass: " + resultCursor.getString(3)
+                                );
+                                userId = resultCursor.getString(0);
+                                userName = resultCursor.getString(1);
+
+                            }
+
                             Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
-                            mCallback.onSignInSuccess(new MainNotes(), Tables.SIGNED_USERNAME);
-                        } else {
-                            Toast.makeText(getActivity().getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                            mCallback.onSignInSuccess(new MainNotes(), userName);
 
+                            if (!Tables.SIGNED_USERNAME.equals("")) {
+
+                                if (Tables.progressDialog != null) {
+                                    if (Tables.progressDialog.isShowing()) {
+                                        Tables.progressDialog.dismiss();
+                                    }
+                                }
+
+                                Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
+                                mCallback.onSignInSuccess(new MainNotes(), Tables.SIGNED_USERNAME);
+
+                            } else {
+                                Toast.makeText(getActivity().getApplicationContext(), "Local login failed!", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } else {
+                            Toast.makeText(getActivity().getApplicationContext(), "Local login failed!", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
                 } else {
                     Toast.makeText(getActivity().getApplicationContext(), "Empty fields!", Toast.LENGTH_SHORT).show();
                     //switchFragment();

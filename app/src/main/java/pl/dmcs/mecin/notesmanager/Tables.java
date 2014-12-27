@@ -43,7 +43,7 @@ public class Tables {
     public static String SIGNED_USERNAME = "";
     public static String SIGNED_USER_ID = "";
 
-    public static ArrayList<String> notesArrayList = null;
+    public static ArrayList<Note> notesArrayList = null;
 
     public static final class Users implements BaseColumns {
         private Users() {
@@ -295,7 +295,7 @@ public class Tables {
                     for(int i = 0; i < notesJsonArray.length(); i++) {
                         JSONObject row = notesJsonArray.getJSONObject(i);
                         Log.d("FOREACH","note: " + i + " " + row.getString(Notes.NOTETITLE) + " == " + row.getString(Notes.NOTECONTENT));
-                        Tables.notesArrayList.add("Title: " + row.getString(Notes.NOTETITLE) + "\nContent: " + row.getString(Notes.NOTECONTENT));
+                        Tables.notesArrayList.add(new Note(row.getString(Notes.NOTETITLE), row.getString(Notes.NOTECONTENT)));
                     }
                     Log.d("notes get message", resultJSNObject.getString("message"));
                     Log.d("OP POST", "API_GET_NOTES was executed successfully.");

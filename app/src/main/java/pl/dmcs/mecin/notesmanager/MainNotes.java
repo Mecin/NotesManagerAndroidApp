@@ -3,6 +3,8 @@ package pl.dmcs.mecin.notesmanager;
 
 import android.app.ListFragment;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.wifi.WifiConfiguration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -10,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -21,6 +24,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -28,7 +32,7 @@ import java.util.ArrayList;
  */
 public class MainNotes extends ListFragment {
 
-    protected ArrayAdapter<String> adapter;
+    protected NoteAdapter adapter;
 
     public MainNotes() {
         // Required empty public constructor
@@ -38,10 +42,27 @@ public class MainNotes extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, Tables.notesArrayList);
+        adapter = new NoteAdapter(getActivity(), R.layout.note_adapter_row, Tables.notesArrayList);
         setListAdapter(adapter);
         final ListView notesListView = getListView();
+
+        notesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+                //Toast.makeText(getActivity().getApplicationContext(), "position: " + position + " id: " + id, Toast.LENGTH_SHORT).show();
+
+                Bundle args = new Bundle();
+                args.putParcelable("note", Tables.notesArrayList.get(position));
+
+                ShowNoteDialog showNoteDialog = new ShowNoteDialog();
+
+                showNoteDialog.setArguments(args);
+
+                showNoteDialog.show(getFragmentManager(), "ShowNoteDialog");
+
+            }
+        });
 
         if(getArguments() != null) {
             if (getArguments().getString("user") != null) {
@@ -54,29 +75,17 @@ public class MainNotes extends ListFragment {
 
         if (savedInstanceState != null) {
             Log.d("onActivityCreated", "savedInstanceState != null");
-            String[] values = savedInstanceState.getStringArray("storedAdapter");
-            if (values != null) {
+
+            if (Tables.notesArrayList != null) {
                 Log.d("onActivityCreated", "values != null");
-                adapter.addAll(values);
-                adapter.notifyDataSetChanged();
-                //setListAdapter(adapter);
+                ArrayList<Note> values = savedInstanceState.getParcelableArrayList("storedAdapter");
+                if(values != null) {
+                    adapter.addAll(values);
+                    adapter.notifyDataSetChanged();
+                    //setListAdapter(adapter);
+                }
             }
         }
-
-        // JSON getUser
-        // JSONObject getUserJsonObject = new JSONObject();
-
-
-
-        //try {
-
-        //    getUserJsonObject.put(Tables.Users.USERNAME, SIGNED_USER);
-        //    new HttpAsyncTask().execute(getUserJsonObject, Tables.API_SERVER + Tables.API_GET_USER);
-
-        //} catch (JSONException e) {
-        //    e.printStackTrace();
-        //}
-        //ListView listView = (ListView) getActivity().findViewById(R.id.list);
 
         TextView signedUserTextView = (TextView) getActivity().findViewById(R.id.signed_user);
         signedUserTextView.append(" " + Tables.SIGNED_USERNAME + ".");
@@ -88,6 +97,8 @@ public class MainNotes extends ListFragment {
         Log.d("fetch NOTES", "DONE, notify changes.");
 
         adapter.notifyDataSetChanged();
+
+
     }
 
     @Override
@@ -96,31 +107,33 @@ public class MainNotes extends ListFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main_notes, container, false);
 
-        Tables.notesArrayList = new ArrayList<String>();
+        Tables.notesArrayList = new ArrayList<Note>();
+
+        if(savedInstanceState != null) {
+            Log.d("SIS", "NOTES ALREADY FETCHED");
+        } else {
+
+            Tables.progressDialog = ProgressDialog.show(view.getContext(), "", "Please wait...", true, true);
+
+            // Get notes
+            // JSON
+            JSONObject getNotesJsonObject = new JSONObject();
+            try {
+                Log.d("JSON", Tables.Notes.NOTEOWNER + "Id");
+
+                getNotesJsonObject.put(Tables.Notes.NOTEOWNER + "Id", Tables.SIGNED_USER_ID);
+
+                Log.d("JSON", "before execute");
+
+                Tables.fetchNotes = true;
+
+                new HttpAsyncTask().execute(getNotesJsonObject, Tables.API_SERVER + Tables.API_GET_NOTES);
 
 
-        Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
-
-        // Get notes
-        // JSON
-        JSONObject getNotesJsonObject = new JSONObject();
-        try {
-            Log.d("JSON", Tables.Notes.NOTEOWNER + "Id");
-
-            getNotesJsonObject.put(Tables.Notes.NOTEOWNER + "Id", Tables.SIGNED_USER_ID);
-
-            Log.d("JSON", "before execute");
-
-            Tables.fetchNotes = true;
-
-            new HttpAsyncTask().execute(getNotesJsonObject, Tables.API_SERVER + Tables.API_GET_NOTES);
-
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
-
         final Button addNoteButton = (Button) view.findViewById(R.id.add_note_button);
         addNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,7 +153,7 @@ public class MainNotes extends ListFragment {
             @Override
             public void onClick(View v) {
                 if(!Tables.progressDialog.isShowing()) {
-                    Tables.progressDialog = ProgressDialog.show(getActivity(), "", "Please wait...", true, true);
+                    Tables.progressDialog = ProgressDialog.show(v.getContext(), "", "Please wait...", true, true);
                 }
                 //Toast.makeText(getActivity().getApplicationContext(), "Fetch notes", Toast.LENGTH_SHORT).show();
                 // Get notes
@@ -170,9 +183,9 @@ public class MainNotes extends ListFragment {
 
                     adapter.notifyDataSetChanged();
 
-                    for(String s : Tables.notesArrayList) {
-                        Log.d("NOTES TEST", s);
-                    }
+                    //for(String s : Tables.notesArrayList) {
+                    //    Log.d("NOTES TEST", s);
+                    //}
 
 
 
@@ -193,16 +206,49 @@ public class MainNotes extends ListFragment {
     @Override
     public void onSaveInstanceState(Bundle savedState) {
         // To avoid null pointer exception when fragment is shadowed
-        if(adapter != null) {
-            String[] storedAdapter = new String[adapter.getCount()];
-            for (int i = 0; i < adapter.getCount(); i++) {
-                storedAdapter[i] = adapter.getItem(i);
-            }
+        if(adapter != null && Tables.notesArrayList != null) {
 
-            savedState.putStringArray("storedAdapter", storedAdapter);
+            savedState.putParcelableArrayList("storedAdapter", Tables.notesArrayList);
         }
         super.onSaveInstanceState(savedState);
         Log.d("onSaveInstanceState", "savedState put data");
+    }
+
+    private class NoteAdapter extends ArrayAdapter<Note> {
+
+        private ArrayList<Note> items;
+
+        public NoteAdapter(Context context, int textViewResourceId,
+                         ArrayList<Note> items) {
+            super(context, textViewResourceId, items);
+            this.items = items;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater vi = LayoutInflater.from(getContext());
+                v = vi.inflate(R.layout.note_adapter_row, null);
+            }
+            Note o = items.get(position);
+            if (o != null) {
+
+                TextView titleTextView = (TextView) v.findViewById(R.id.note_title_row);
+
+                TextView textTextView = (TextView) v.findViewById(R.id.note_text_row);
+
+                if (titleTextView != null) {
+                    titleTextView.setText(o.getTitle());
+                }
+
+                if(textTextView != null) {
+                    textTextView.setText(o.getNote());
+                }
+            }
+            return v;
+        }
+
     }
 
 }

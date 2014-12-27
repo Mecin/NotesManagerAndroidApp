@@ -5,11 +5,13 @@
     tools:context="pl.dmcs.mecin.raspic.ConnectDialogFragment"
     android:layout_gravity="center"
     android:orientation="vertical"
-    android:paddingTop="5dp"
+    android:paddingTop="20dp"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp">
+    android:paddingRight="10dp"
+    android:paddingBottom="20dp">
 
     <EditText
+
         android:id="@+id/note_title"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -25,6 +27,7 @@
         android:layout_height="fill_parent"
         android:hint="@string/note_text"
         android:maxLines="5"
+
         />
 
 </LinearLayout>
