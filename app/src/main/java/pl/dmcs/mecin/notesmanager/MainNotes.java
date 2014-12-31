@@ -37,6 +37,8 @@ public class MainNotes extends ListFragment {
 
     protected NoteAdapter adapter;
 
+    protected ProgressDialog progressDialog;
+
     public MainNotes() {
         // Required empty public constructor
     }
@@ -143,7 +145,7 @@ public class MainNotes extends ListFragment {
             Log.d("SIS", "NOTES ALREADY FETCHED");
         } else {
 
-            Tables.progressDialog = ProgressDialog.show(view.getContext(), "", "Please wait...", true, true);
+            progressDialog = ProgressDialog.show(view.getContext(), "", "Please wait...", true, true);
 
             // Get notes
             // JSON
@@ -182,8 +184,8 @@ public class MainNotes extends ListFragment {
         getNotesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!Tables.progressDialog.isShowing()) {
-                    Tables.progressDialog = ProgressDialog.show(v.getContext(), "", "Please wait...", true, true);
+                if(!progressDialog.isShowing()) {
+                    progressDialog = ProgressDialog.show(v.getContext(), "", "Please wait...", true, true);
                 }
                 //Toast.makeText(getActivity().getApplicationContext(), "Fetch notes", Toast.LENGTH_SHORT).show();
                 // Get notes
@@ -217,6 +219,11 @@ public class MainNotes extends ListFragment {
                     //    Log.d("NOTES TEST", s);
                     //}
 
+                    if (progressDialog != null) {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                    }
 
 
                 } catch (JSONException e) {
@@ -228,6 +235,12 @@ public class MainNotes extends ListFragment {
                 //mCallback.onButtonClick(new SignUp());
             }
         });
+
+        if (progressDialog != null) {
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        }
 
         return view;
     }

@@ -248,8 +248,8 @@ public class Tables {
                     Tables.loggingFlag = false;
                 } else {
                     Log.d("OP POST", "SIGNED_USERNAME could not be set.");
-                    Tables.loggingFlag = false;
                     Tables.SIGNED_USERNAME = "";
+                    Tables.loggingFlag = false;
                 }
 
                 if(Tables.progressDialog != null) {

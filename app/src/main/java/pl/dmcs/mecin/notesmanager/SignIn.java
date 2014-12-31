@@ -30,6 +30,8 @@ public class SignIn extends Fragment {
 
     OnSignIn mCallback;
 
+    protected ProgressDialog progressDialog;
+
     public SignIn() {
         // Required empty public constructor
     }
@@ -62,6 +64,10 @@ public class SignIn extends Fragment {
             @Override
             public void onClick(View v) {
 
+                Log.d("progressDialog", "before progressDialog");
+
+                progressDialog = ProgressDialog.show(v.getContext(), "", "Please wait...", true, true);
+
                 EditText userEditText = (EditText) getView().findViewById(R.id.user_name_sign_in);
                 EditText passEditText = (EditText) getView().findViewById(R.id.user_passwd_sign_in); //TODO still not encrypted
 
@@ -71,10 +77,6 @@ public class SignIn extends Fragment {
                 // Simply check
                 if (!user.equals("") && !pass.equals("")) {
                     Log.d("LOGIN", "before login.");
-
-                    Log.d("progressDialog", "before progressDialog");
-
-                    Tables.progressDialog = ProgressDialog.show(v.getContext(), "", "Please wait...", true, true);
 
                     // JSON login
                     JSONObject userJsonObject = new JSONObject();
@@ -108,11 +110,7 @@ public class SignIn extends Fragment {
 
                     if (!Tables.SIGNED_USERNAME.equals("")) {
 
-                        if (Tables.progressDialog != null) {
-                            if (Tables.progressDialog.isShowing()) {
-                                Tables.progressDialog.dismiss();
-                            }
-                        }
+                        progressDialogDismiss();
 
                         Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
                         mCallback.onSignInSuccess(new MainNotes(), Tables.SIGNED_USERNAME);
@@ -149,11 +147,7 @@ public class SignIn extends Fragment {
 
                             if (!Tables.SIGNED_USERNAME.equals("")) {
 
-                                if (Tables.progressDialog != null) {
-                                    if (Tables.progressDialog.isShowing()) {
-                                        Tables.progressDialog.dismiss();
-                                    }
-                                }
+                                progressDialogDismiss();
 
                                 Toast.makeText(getActivity().getApplicationContext(), "Login success!", Toast.LENGTH_SHORT).show();
                                 mCallback.onSignInSuccess(new MainNotes(), Tables.SIGNED_USERNAME);
@@ -171,6 +165,8 @@ public class SignIn extends Fragment {
                     Toast.makeText(getActivity().getApplicationContext(), "Empty fields!", Toast.LENGTH_SHORT).show();
                     //switchFragment();
                 }
+
+                progressDialogDismiss();
             }
         });
 
@@ -178,5 +174,12 @@ public class SignIn extends Fragment {
     }
 
 
+    private void progressDialogDismiss() {
+        if (progressDialog != null) {
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        }
+    }
 
 }
